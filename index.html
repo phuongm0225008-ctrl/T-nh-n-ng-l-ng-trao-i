@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Toán Dinh Dưỡng Chăn Nuôi (ME Calculator)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0fdf4; /* Green-50 */
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Custom scrollbar for aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Navbar -->
+    <nav class="bg-green-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-seedling text-2xl"></i>
+                <h1 class="text-xl font-bold">AgriCalc VN</h1>
+            </div>
+            <div class="text-sm hidden md:block opacity-90">Công cụ tính toán dinh dưỡng chăn nuôi</div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-bold text-green-800 mb-2">Tính Năng Lượng Trao Đổi (ME)</h2>
+            <p class="text-gray-600">Nhập các chỉ số phân tích hóa học (Proximate Analysis) để ước tính năng lượng.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Input Column -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-md border-t-4 border-green-600 h-fit">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-700 flex items-center">
+                        <i class="fa-solid fa-pen-to-square mr-2 text-green-600"></i> Nhập Dữ Liệu (%)
+                    </h3>
+                    <button type="button" onclick="loadSampleData()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1 rounded border border-gray-300 transition shadow-sm" title="Nạp dữ liệu Ngô Mỹ (US Corn)">
+                        <i class="fa-solid fa-flask mr-1"></i> Mẫu Ngô
+                    </button>
+                </div>
+
+                <form id="calcForm" class="space-y-4">
+                    
+                    <!-- Species Selection -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Đối tượng vật nuôi</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="species" value="poultry" checked class="peer sr-only">
+                                <div class="text-center p-2 border rounded-lg hover:bg-green-50 peer-checked:bg-green-600 peer-checked:text-white transition">
+                                    <i class="fa-solid fa-kiwi-bird mr-1"></i> Gia Cầm
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="species" value="swine" class="peer sr-only">
+                                <div class="text-center p-2 border rounded-lg hover:bg-green-50 peer-checked:bg-green-600 peer-checked:text-white transition">
+                                    <i class="fa-solid fa-piggy-bank mr-1"></i> Heo (Lợn)
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Input Fields -->
+                    <div>
+                        <label for="moisture" class="block text-sm font-medium text-gray-700">Độ ẩm (Moisture %)</label>
+                        <input type="number" id="moisture" step="0.01" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-gray-50 border p-2" placeholder="Ví dụ: 12.0">
+                    </div>
+
+                    <div>
+                        <label for="cp" class="block text-sm font-medium text-gray-700">Protein thô (CP %)</label>
+                        <input type="number" id="cp" step="0.01" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-gray-50 border p-2" placeholder="Ví dụ: 20.0">
+                    </div>
+
+                    <div>
+                        <label for="ee" class="block text-sm font-medium text-gray-700">Béo thô (EE %)</label>
+                        <input type="number" id="ee" step="0.01" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-gray-50 border p-2" placeholder="Ví dụ: 5.0">
+                    </div>
+
+                    <div>
+                        <label for="cf" class="block text-sm font-medium text-gray-700">Xơ thô (CF %)</label>
+                        <input type="number" id="cf" step="0.01" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-gray-50 border p-2" placeholder="Ví dụ: 4.0">
+                    </div>
+
+                    <div>
+                        <label for="ash" class="block text-sm font-medium text-gray-700">Khoáng tổng số / Tro (Ash %)</label>
+                        <input type="number" id="ash" step="0.01" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 bg-gray-50 border p-2" placeholder="Ví dụ: 6.0">
+                    </div>
+
+                    <div class="pt-4 flex gap-2">
+                        <button type="button" onclick="calculateME()" class="flex-1 bg-green-600 text-white font-bold py-2 px-4 rounded hover:bg-green-700 transition">
+                            <i class="fa-solid fa-calculator mr-2"></i> Tính Toán
+                        </button>
+                        <button type="button" onclick="resetForm()" class="px-4 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 transition">
+                            Làm mới
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Column -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Main Result Card -->
+                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-100 rounded-full opacity-50 blur-xl"></div>
+                    
+                    <h3 class="text-xl font-bold text-gray-700 mb-4 flex items-center">
+                        <i class="fa-solid fa-chart-simple mr-2 text-blue-500"></i> Kết Quả Tính Toán
+                    </h3>
+
+                    <div id="alertBox" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <strong class="font-bold">Lỗi!</strong>
+                        <span class="block sm:inline" id="alertMessage">Tổng % các thành phần vượt quá 100%.</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- ME Result -->
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 text-center md:col-span-1">
+                            <div class="text-xs text-blue-600 font-bold uppercase mb-1">Năng lượng (ME)</div>
+                            <div class="text-3xl font-extrabold text-blue-800 my-1">
+                                <span id="resME">0</span>
+                            </div>
+                            <div class="text-xs text-blue-600 mb-1">kcal/kg</div>
+                            <div class="text-xs text-gray-500 border-t border-blue-200 pt-1 mt-1">
+                                ≈ <span id="resMJ">0</span> MJ/kg
+                            </div>
+                        </div>
+
+                        <!-- DM Result -->
+                        <div class="bg-amber-50 p-4 rounded-lg border border-amber-100 text-center md:col-span-1">
+                            <div class="text-xs text-amber-600 font-bold uppercase mb-1">Vật chất khô (DM)</div>
+                            <div class="text-3xl font-extrabold text-amber-800 my-1">
+                                <span id="resDM">0</span>
+                            </div>
+                            <div class="text-xs text-amber-600 mb-1">%</div>
+                            <div class="text-xs text-gray-500 border-t border-amber-200 pt-1 mt-1">
+                                (Trừ độ ẩm)
+                            </div>
+                        </div>
+
+                        <!-- NFE Result -->
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-100 text-center md:col-span-1">
+                            <div class="text-xs text-green-600 font-bold uppercase mb-1">Dẫn xuất không đạm (NFE)</div>
+                            <div class="text-3xl font-extrabold text-green-800 my-1">
+                                <span id="resNFE">0</span>
+                            </div>
+                            <div class="text-xs text-green-600 mb-1">%</div>
+                            <div class="text-xs text-gray-500 border-t border-green-200 pt-1 mt-1">
+                                (Tinh bột & Đường)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-gray-700 mb-2">Thành phần nguyên liệu:</h4>
+                        <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden flex text-xs font-bold text-white shadow-inner">
+                            <div id="barMoisture" class="bg-blue-400 flex items-center justify-center" style="width: 0%" title="Độ ẩm"></div>
+                            <div id="barCP" class="bg-red-500 flex items-center justify-center" style="width: 0%" title="Đạm (CP)"></div>
+                            <div id="barEE" class="bg-yellow-400 flex items-center justify-center" style="width: 0%" title="Béo (EE)"></div>
+                            <div id="barCF" class="bg-green-800 flex items-center justify-center" style="width: 0%" title="Xơ (CF)"></div>
+                            <div id="barAsh" class="bg-gray-500 flex items-center justify-center" style="width: 0%" title="Tro (Ash)"></div>
+                            <div id="barNFE" class="bg-green-400 flex items-center justify-center" style="width: 0%" title="NFE"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-3 mt-2 text-xs text-gray-600 justify-center">
+                            <div class="flex items-center"><span class="w-3 h-3 bg-blue-400 rounded-full mr-1"></span> Ẩm</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-red-500 rounded-full mr-1"></span> Đạm</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-yellow-400 rounded-full mr-1"></span> Béo</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-green-800 rounded-full mr-1"></span> Xơ</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-gray-500 rounded-full mr-1"></span> Tro</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-green-400 rounded-full mr-1"></span> NFE</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h3 class="text-lg font-bold text-gray-700 mb-3 border-b pb-2">Giải Thích Thuật Ngữ</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="mb-2"><strong class="text-green-700">ME (Metabolizable Energy):</strong> Năng lượng trao đổi. Là phần năng lượng giữ lại trong cơ thể sau khi trừ đi năng lượng mất qua phân và nước tiểu. Đây là chỉ số quan trọng nhất để thiết lập khẩu phần ăn.</p>
+                            <p class="mb-2"><strong class="text-green-700">CP (Crude Protein):</strong> Protein thô. Tổng lượng Nitơ có trong thức ăn nhân với hệ số 6.25.</p>
+                        </div>
+                        <div>
+                            <p class="mb-2"><strong class="text-green-700">NFE (Nitrogen Free Extract):</strong> Dẫn xuất không chứa đạm. Bao gồm chủ yếu là tinh bột và đường dễ tiêu hóa. Được tính bằng cách lấy 100% trừ đi các thành phần khác.</p>
+                            <p class="mb-2"><strong class="text-green-700">Công thức ước tính:</strong> Công cụ sử dụng phương trình hồi quy dựa trên thành phần hóa học để ước lượng ME cho gia cầm và heo.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-green-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-2">© 2024 AgriCalc VN. Công cụ hỗ trợ chăn nuôi.</p>
+            <p class="text-xs opacity-70">Lưu ý: Kết quả chỉ mang tính chất tham khảo. Nên phân tích mẫu thực tế tại phòng thí nghiệm để có kết quả chính xác nhất.</p>
+        </div>
+    </footer>
+
+    <script>
+        function getVal(id) {
+            return parseFloat(document.getElementById(id).value) || 0;
+        }
+
+        function loadSampleData() {
+            // Classic Yellow Corn / Maize Values
+            document.getElementById('moisture').value = 14.0;
+            document.getElementById('cp').value = 8.5;
+            document.getElementById('ee').value = 3.5;
+            document.getElementById('cf').value = 2.0;
+            document.getElementById('ash').value = 1.5;
+            calculateME();
+        }
+
+        function calculateME() {
+            // Get inputs
+            const moisture = getVal('moisture');
+            const cp = getVal('cp');
+            const ee = getVal('ee'); // Ether Extract (Fat)
+            const cf = getVal('cf'); // Crude Fiber
+            const ash = getVal('ash');
+            
+            const species = document.querySelector('input[name="species"]:checked').value;
+            const alertBox = document.getElementById('alertBox');
+            
+            // Check validity
+            const totalKnown = moisture + cp + ee + cf + ash;
+            
+            if (totalKnown > 100) {
+                alertBox.classList.remove('hidden');
+                document.getElementById('alertMessage').innerText = `Tổng các thành phần là ${totalKnown.toFixed(2)}%, vượt quá 100%. Vui lòng kiểm tra lại.`;
+                resetResults();
+                return;
+            } else {
+                alertBox.classList.add('hidden');
+            }
+
+            // Calculate NFE and DM
+            const nfe = 100 - totalKnown;
+            const dm = 100 - moisture;
+
+            // Calculate ME based on Species
+            let me = 0;
+
+            if (species === 'poultry') {
+                // Common Regression Equation for Poultry ME (kcal/kg)
+                // ME = (37 x CP) + (81.8 x EE) + (35.5 x NFE)
+                me = (37 * cp) + (81.8 * ee) + (35.5 * nfe);
+            } else if (species === 'swine') {
+                // Estimation for Swine (Digestible Energy DE -> ME)
+                // DE (kcal/kg) approx formula: 4151 - (122 * Ash) + (23 * CP) + (38 * EE) - (64 * CF)
+                // ME approx 96% of DE for swine
+                const de = 4151 - (122 * ash) + (23 * cp) + (38 * ee) - (64 * cf);
+                me = de * 0.96;
+                
+                // Safety clamp
+                if (me < 0) me = 0;
+            }
+
+            // Update UI
+            animateValue("resME", parseInt(document.getElementById("resME").innerText), Math.round(me), 800);
+            document.getElementById('resMJ').innerText = (me * 0.004184).toFixed(2);
+            animateValue("resNFE", parseFloat(document.getElementById("resNFE").innerText), nfe.toFixed(2), 800, true);
+            
+            // Update DM (using innerText direct update for simplicity or animate)
+            animateValue("resDM", parseFloat(document.getElementById("resDM").innerText), dm.toFixed(2), 800, true);
+
+            // Update Bars
+            updateBar('barMoisture', moisture);
+            updateBar('barCP', cp);
+            updateBar('barEE', ee);
+            updateBar('barCF', cf);
+            updateBar('barAsh', ash);
+            updateBar('barNFE', nfe);
+        }
+
+        function updateBar(id, value) {
+            const el = document.getElementById(id);
+            el.style.width = value + '%';
+            if (value > 5) {
+                el.innerText = Math.round(value) + '%';
+            } else {
+                el.innerText = '';
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('calcForm').reset();
+            resetResults();
+            document.getElementById('alertBox').classList.add('hidden');
+        }
+
+        function resetResults() {
+            document.getElementById('resME').innerText = '0';
+            document.getElementById('resMJ').innerText = '0';
+            document.getElementById('resNFE').innerText = '0';
+            document.getElementById('resDM').innerText = '0';
+            
+            updateBar('barMoisture', 0);
+            updateBar('barCP', 0);
+            updateBar('barEE', 0);
+            updateBar('barCF', 0);
+            updateBar('barAsh', 0);
+            updateBar('barNFE', 0);
+        }
+
+        // Animation utility
+        function animateValue(id, start, end, duration, isFloat = false) {
+            if (start === end) return;
+            const range = end - start;
+            let current = start;
+            const increment = end > start ? 1 : -1;
+            
+            const obj = document.getElementById(id);
+            const timer = setInterval(function() {
+                if (isFloat) {
+                    current += (range / 20); 
+                    if ((range > 0 && current >= end) || (range < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(timer);
+                    }
+                    obj.innerHTML = parseFloat(current).toFixed(2);
+                } else {
+                    current += increment * Math.ceil(Math.abs(range) / 20);
+                    if ((range > 0 && current >= end) || (range < 0 && current <= end)) {
+                        current = end;
+                        clearInterval(timer);
+                    }
+                    obj.innerHTML = current;
+                }
+            }, 30);
+            
+            setTimeout(() => {
+                obj.innerHTML = isFloat ? parseFloat(end).toFixed(2) : Math.round(end);
+                clearInterval(timer);
+            }, duration + 50);
+        }
+
+        // Initial empty state
+        resetResults();
+    </script>
+</body>
+</html>
